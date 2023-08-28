@@ -9,6 +9,18 @@
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
+  <depend>rclcpp</depend>
+  <depend>rclcpp_components</depend>
+  <depend>rclcpp_lifecycle</depend>
+  <depend>sensor_msgs</depend>
+
+  <depend>romea_mobile_base_utils</depend>
+  <depend>romea_mobile_base_msgs</depend>
+  <depend>romea_path_utils</depend>
+  <depend>romea_path_msgs</depend>
+  <depend>romea_core_control</depend>
+  <depend>romea_following_utils</depend>
+
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
 
