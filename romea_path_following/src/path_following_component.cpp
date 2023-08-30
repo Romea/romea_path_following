@@ -56,15 +56,16 @@ try {
 PathFollowingComponent::CallbackReturn PathFollowingComponent::on_activate(
   const rclcpp_lifecycle::State &)
 {
-  RCLCPP_INFO(node_->get_logger(), "activated");
-  return CallbackReturn::FAILURE;
+  control_->start();
+  return CallbackReturn::SUCCESS;
 }
 
 //-----------------------------------------------------------------------------
 PathFollowingComponent::CallbackReturn PathFollowingComponent::on_deactivate(
   const rclcpp_lifecycle::State &)
 {
-  return CallbackReturn::FAILURE;
+  control_->stop();
+  return CallbackReturn::SUCCESS;
 }
 
 }  // namespace romea

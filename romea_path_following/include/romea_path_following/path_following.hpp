@@ -38,7 +38,10 @@ class PathFollowingBase
 public:
   virtual ~PathFollowingBase() = default;
   virtual void init() = 0;
+  virtual void start() {}
+  virtual void stop() {}
 };
+
 
 template<class CommandType>
 class PathFollowing : public PathFollowingBase
@@ -66,6 +69,10 @@ protected:
   void process_odometry_(const OdometryMeasureMsg & msg);
 
   void process_joystick_(sensor_msgs::msg::Joy::ConstSharedPtr msg);
+
+  void start() override;
+
+  void stop() override;
 
   // void goalCallback_();
   //

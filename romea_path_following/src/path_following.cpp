@@ -184,6 +184,22 @@ void PathFollowing<CommandType>::process_joystick_(sensor_msgs::msg::Joy::ConstS
   }
 }
 
+template<class CommandType>
+void PathFollowing<CommandType>::start()
+{
+  path_following_algo_.reset();
+  cmd_interface_->start();
+  RCLCPP_INFO_STREAM(node_->get_logger(), "command started");
+  path_following_algo_.setDesiredLateralDeviation(desired_lateral_deviation_);
+}
+
+template<class CommandType>
+void PathFollowing<CommandType>::stop()
+{
+  cmd_interface_->stop(true);
+  RCLCPP_INFO_STREAM(node_->get_logger(), "command stopped");
+}
+
 // //-----------------------------------------------------------------------------
 // template <class CommandType>
 // void PathFollowing<CommandType>::goalCallback_()
