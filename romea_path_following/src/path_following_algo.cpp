@@ -12,7 +12,6 @@
 #include <romea_core_mobile_base/kinematic/axle_steering/TwoAxleSteeringCommand.hpp>
 #include <romea_following_utils/command_factory.hpp>
 #include <romea_following_utils/observer_factory.hpp>
-#include <romea_mobile_base_utils/params/mobile_base_inertia_parameters.hpp>
 #include <romea_mobile_base_utils/params/mobile_base_parameters.hpp>
 #include <romea_path_utils/path_frenet_pose2d_conversions.hpp>
 #include <romea_path_utils/path_posture2d_conversions.hpp>
@@ -38,7 +37,6 @@ PathFollowingAlgo<CommandType>::PathFollowingAlgo(Node::SharedPtr node) : node_(
     declare_mobile_base_info_4WS4WD(node_, "base");
   }
 
-  declare_inertia_info(node_, "inertia");
   declare_debug(node_);
   declare_sliding_observer_cinematic_linear_tangent_parameters(node_, OBSERVER_NS_CINEMATIC);
   declare_sliding_observer_cinematic_lyapunov_parameters(node_, OBSERVER_NS_CINEMATIC_LYAPUNOV);
@@ -82,7 +80,7 @@ void PathFollowingAlgo<TwoAxleSteeringCommand>::initKinematicParameters_()
 {
   auto base_info = get_mobile_base_info_4WS4WD(node_, "base");
   wheelbase_ = base_info.geometry.axlesDistance;
-  inertia_parameters_ = get_inertia_info(node_, "inertia");
+  inertia_parameters_ = base_info.inertia;
 
   node_->get_parameter("rear_steering_command_enabled", is_rear_steering_command_enabled_);
 
@@ -98,7 +96,7 @@ void PathFollowingAlgo<OneAxleSteeringCommand>::initKinematicParameters_()
 {
   auto base_info = get_mobile_base_info_2FWS2RWD(node_, "base");
   wheelbase_ = base_info.geometry.axlesDistance;
-  inertia_parameters_ = get_inertia_info(node_, "inertia");
+  inertia_parameters_ = base_info.inertia;
 
   is_rear_steering_command_enabled_ = false;
 

@@ -31,22 +31,22 @@ namespace romea
 //-----------------------------------------------------------------------------
 template<class CommandType>
 PathFollowing<CommandType>::PathFollowing(Node::SharedPtr node)
-: node_(std::move(node)), curvilinear_abscissa_goal_(-1), path_following_algo_(node)
+: node_(std::move(node)), curvilinear_abscissa_goal_(-1), path_following_algo_(node_)
 //  rviz_tool_("map","obstacle")
 {
   declare_command_interface_configuration(node_, "cmd_output");
 
-  declare_parameter_with_default(node, "joy_start_button1", XBOX_X_BUTTON);
-  declare_parameter_with_default(node, "joy_start_button2", XBOX_Y_BUTTON);
-  declare_parameter_with_default(node, "joy_stop_button", XBOX_B_BUTTON);
-  declare_parameter_with_default(node, "joy_start_button1_desired_lateral_deviation", 0.);
-  declare_parameter_with_default(node, "joy_start_button2_desired_lateral_deviation", 0.);
+  declare_parameter_with_default(node_, "joy_start_button1", XBOX_X_BUTTON);
+  declare_parameter_with_default(node_, "joy_start_button2", XBOX_Y_BUTTON);
+  declare_parameter_with_default(node_, "joy_stop_button", XBOX_B_BUTTON);
+  declare_parameter_with_default(node_, "joy_start_button1_desired_lateral_deviation", 0.);
+  declare_parameter_with_default(node_, "joy_start_button2_desired_lateral_deviation", 0.);
 
   // TODO move all this params to PathFollowingAlgo
-  declare_parameter_with_default(node, "desired_lateral_deviation", 0.);
-  declare_parameter_with_default(node, "desired_linear_speed", 0.5);
-  declare_parameter_with_default(node, "desired_course_deviation", 0.);
-  declare_parameter_with_default(node, "use_path_velocity", false);
+  declare_parameter_with_default(node_, "desired_lateral_deviation", 0.);
+  declare_parameter_with_default(node_, "desired_linear_speed", 0.5);
+  declare_parameter_with_default(node_, "desired_course_deviation", 0.);
+  declare_parameter_with_default(node_, "use_path_velocity", false);
 }
 
 //-----------------------------------------------------------------------------

@@ -8,7 +8,7 @@
 namespace romea
 {
 
-class PathFollowingComponent : public rclcpp_lifecycle::LifecycleNode
+class PathFollowingComponent
 {
 public:
   using CallbackReturn = rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn;
@@ -16,12 +16,16 @@ public:
 public:
   PathFollowingComponent(const rclcpp::NodeOptions & options);
 
-  CallbackReturn on_configure(const rclcpp_lifecycle::State &) override;
-  CallbackReturn on_activate(const rclcpp_lifecycle::State &) override;
-  CallbackReturn on_deactivate(const rclcpp_lifecycle::State &) override;
+  auto get_node_base_interface() const { return node_->get_node_base_interface(); }
+
+  CallbackReturn on_configure(const rclcpp_lifecycle::State &);
+  CallbackReturn on_activate(const rclcpp_lifecycle::State &);
+  CallbackReturn on_deactivate(const rclcpp_lifecycle::State &);
 
 private:
+  rclcpp_lifecycle::LifecycleNode::SharedPtr node_;
   std::unique_ptr<PathFollowingBase> control_;
+  bool autostart_;
 };
 
 }  // namespace romea
