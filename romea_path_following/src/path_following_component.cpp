@@ -18,8 +18,8 @@ PathFollowingComponent::PathFollowingComponent(const rclcpp::NodeOptions & optio
   node_->declare_parameter("base.type", rclcpp::PARAMETER_STRING, std::move(frame_descr));
 
   rcl_interfaces::msg::ParameterDescriptor autostart_descr;
-  autostart_descr.description = "Automatic configuration and activation when the node is created";
-  node_->declare_parameter("autostart", false, std::move(autostart_descr));
+  autostart_descr.description = "Automatic configuration when the node is created";
+  node_->declare_parameter("auto_configure", false, std::move(autostart_descr));
 
   auto frame = romea::get_parameter<std::string>(node_, "base.type");
   if (frame == "4WS4WD") {
@@ -32,10 +32,8 @@ PathFollowingComponent::PathFollowingComponent(const rclcpp::NodeOptions & optio
     throw std::runtime_error(frame + " frame type  is not supported");
   }
 
-  node_->get_parameter("autostart", autostart_);
-  if (autostart_) {
+  if (get_parameter<bool>(node_, "auto_configure")) {
     node_->configure();
-    node_->activate();
   }
 }
 
