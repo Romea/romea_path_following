@@ -92,6 +92,7 @@ protected:
 
   std::unique_ptr<VehicleInterface> cmd_interface_;
   rclcpp::SubscriptionBase::SharedPtr matching_sub_;
+  rclcpp::SubscriptionBase::SharedPtr odometry_sub_;
   rclcpp::SubscriptionBase::SharedPtr desired_linear_speed_sub_;
   rclcpp::SubscriptionBase::SharedPtr desired_lateral_deviation_sub_;
   rclcpp::SubscriptionBase::SharedPtr joystick_sub_;

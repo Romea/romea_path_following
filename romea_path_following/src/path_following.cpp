@@ -75,11 +75,11 @@ void PathFollowing<CommandType>::init()
     "path_matching/info", reliable(1), std::move(matching_cb));
 
   auto odom_cb = std::bind(&PathFollowing::process_odometry_, this, _1);
-  matching_sub_ =
+  odometry_sub_ =
     node_->create_subscription<OdometryMeasureMsg>("odometry", reliable(1), std::move(odom_cb));
 
   auto joystick_cb = std::bind(&PathFollowing::process_joystick_, this, _1);
-  desired_lateral_deviation_sub_ =
+  joystick_sub_ =
     node_->create_subscription<sensor_msgs::msg::Joy>("joy", reliable(1), std::move(joystick_cb));
 
   auto linear_speed_cb = std::bind(&PathFollowing::process_desired_linear_speed_, this, _1);
