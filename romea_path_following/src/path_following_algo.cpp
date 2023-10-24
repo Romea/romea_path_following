@@ -158,6 +158,8 @@ template<class CommandType>
 CommandType PathFollowingAlgo<CommandType>::computeCommand(
   const romea_path_msgs::msg::PathMatchingInfo2D & msg)
 {
+  const auto & matched_point = msg.matched_points[msg.tracked_matched_point_index];
+
   linear_speed_ = msg.twist.linear_speeds.x;
   angular_speed_ = msg.twist.angular_speed;
   path_length_ = msg.path_length;
@@ -165,8 +167,7 @@ CommandType PathFollowingAlgo<CommandType>::computeCommand(
 
   switch (fsm_status) {
     case FSMStatus::CLASSIC: {
-      size_t id = msg.tracked_matched_point_index;
-      extractMatchedPointInfo(msg.matched_points[id]);
+      extractMatchedPointInfo(matched_point);
       computeLinearSpeedCommand_();
     } break;
     case FSMStatus::BIRD_DECELERATE: {
@@ -858,13 +859,15 @@ void PathFollowingAlgo<CommandType>::updateFSM_(
   switch (fsm_status) {
     case FSMStatus::CLASSIC:
       // if it's the last point
-      if (section_index_last_ != msg.matched_points[0].section_index) {
+      if (section_index_last_ != msg.matched_points[msg.tracked_matched_point_index].section_index) {
         fsm_status = FSMStatus::BIRD_DECELERATE;
+        RCLCPP_INFO(rclcpp::get_logger("FSM"), "transit to BIRD_DECELERATE");
       }
       break;
     case FSMStatus::BIRD_DECELERATE:
       if (std::abs(linear_speed_) < 0.01) {
         fsm_status = FSMStatus::BIRD_WHEEL_ROTATION;
+        RCLCPP_INFO(rclcpp::get_logger("FSM"), "transit to BIRD_WHEEL_ROTATION");
       }
       break;
     case FSMStatus::BIRD_WHEEL_ROTATION:
@@ -874,11 +877,13 @@ void PathFollowingAlgo<CommandType>::updateFSM_(
            std::abs(rear_steering_angle_ - steering_angles_command_.rear) <
          0.05)) {
         fsm_status = FSMStatus::BIRD_ACCELERATE;
+        RCLCPP_INFO(rclcpp::get_logger("FSM"), "transit to BIRD_ACCELERATE");
       }
       break;
     case FSMStatus::BIRD_ACCELERATE:
       if (msg.matched_points.size() == 1) {
         fsm_status = FSMStatus::CLASSIC;
+        RCLCPP_INFO(rclcpp::get_logger("FSM"), "transit to CLASSIC");
       }
       break;
     default:
