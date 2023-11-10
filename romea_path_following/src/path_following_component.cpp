@@ -17,9 +17,13 @@ PathFollowingComponent::PathFollowingComponent(const rclcpp::NodeOptions & optio
   frame_descr.description = "Frame type of the robot [4WS4WD, 2FWS2RWD]";
   node_->declare_parameter("base.type", rclcpp::PARAMETER_STRING, std::move(frame_descr));
 
+  rcl_interfaces::msg::ParameterDescriptor autoconf_descr;
+  autoconf_descr.description = "Automatic configuration when the node is created";
+  node_->declare_parameter("autoconfigure", false, std::move(autoconf_descr));
+
   rcl_interfaces::msg::ParameterDescriptor autostart_descr;
-  autostart_descr.description = "Automatic configuration when the node is created";
-  node_->declare_parameter("auto_configure", false, std::move(autostart_descr));
+  autostart_descr.description = "Automatically start the robot when the node is configured";
+  node_->declare_parameter("autostart", false, std::move(autostart_descr));
 
   auto frame = romea::get_parameter<std::string>(node_, "base.type");
   if (frame == "4WS4WD") {
@@ -32,8 +36,11 @@ PathFollowingComponent::PathFollowingComponent(const rclcpp::NodeOptions & optio
     throw std::runtime_error(frame + " frame type  is not supported");
   }
 
-  if (get_parameter<bool>(node_, "auto_configure")) {
-    node_->configure();
+  if (get_parameter<bool>(node_, "autoconfigure")) {
+    auto state = node_->configure();
+    if (get_parameter<bool>(node_, "autostart") && state.label() == "inactive") {
+      node_->activate();
+    }
   }
 }
 
