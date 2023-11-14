@@ -31,8 +31,10 @@ def launch_setup(context, *args, **kargs):
             namespace=robot_namespace,
             parameters=[mobile_base_info, control_params],
             remappings=[
+                ('cmd_mux/subscribe','base/cmd_mux/subscribe'),
+                ('cmd_mux/unsubscribe','base/cmd_mux/unsubscribe'),
                 ('odometry', 'base/controller/odometry'),
-                ('cmd_one_axle_steering', 'base/controller/cmd_one_axle_steering'),
+#                ('cmd_one_axle_steering', 'base/controller/cmd_one_axle_steering'),
                 ('joy', 'joystick/joy'),
             ],
             # prefix='terminator -x gdbserver localhost:1337',
