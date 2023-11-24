@@ -7,6 +7,8 @@
 
 namespace romea
 {
+namespace ros2
+{
 
 class PathFollowingComponent
 {
@@ -16,7 +18,7 @@ public:
 public:
   PathFollowingComponent(const rclcpp::NodeOptions & options);
 
-  auto get_node_base_interface() const { return node_->get_node_base_interface(); }
+  auto get_node_base_interface() const {return node_->get_node_base_interface();}
 
   CallbackReturn on_configure(const rclcpp_lifecycle::State &);
   CallbackReturn on_activate(const rclcpp_lifecycle::State &);
@@ -28,6 +30,7 @@ private:
   bool autostart_;
 };
 
+}  // namespace ros2
 }  // namespace romea
 
 #endif

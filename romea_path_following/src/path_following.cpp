@@ -27,6 +27,8 @@ const int XBOX_B_BUTTON = 1;
 
 namespace romea
 {
+namespace ros2
+{
 
 //-----------------------------------------------------------------------------
 template<class CommandType>
@@ -278,7 +280,8 @@ void PathFollowing<CommandType>::stop()
 //   //  }
 // }
 
-template class PathFollowing<TwoAxleSteeringCommand>;
-template class PathFollowing<OneAxleSteeringCommand>;
+template class PathFollowing<core::TwoAxleSteeringCommand>;
+template class PathFollowing<core::OneAxleSteeringCommand>;
 
+}  // namespace ros2
 }  // namespace romea

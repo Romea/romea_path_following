@@ -32,6 +32,8 @@
 
 namespace romea
 {
+namespace ros2
+{
 
 class PathFollowingBase
 {
@@ -109,6 +111,7 @@ protected:
   int joy_stop_button_id_;
 };
 
+}  // namespace ros2
 }  // namespace romea
 
 #endif

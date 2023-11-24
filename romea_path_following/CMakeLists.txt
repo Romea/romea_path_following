@@ -48,7 +48,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 )
 
 rclcpp_components_register_node(${PROJECT_NAME}
-  PLUGIN "romea::PathFollowingComponent"
+  PLUGIN "romea::ros2::PathFollowingComponent"
   EXECUTABLE path_following_node
 )
 

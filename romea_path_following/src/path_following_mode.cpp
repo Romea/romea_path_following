@@ -6,6 +6,8 @@
 
 namespace romea
 {
+namespace ros2
+{
 
 //-----------------------------------------------------------------------------
 PathFollowingMode deducePathFollowingMode(
@@ -37,4 +39,5 @@ std::string toString(const PathFollowingMode & status)
   }
 }
 
-}  //End of namespace romea
+}  // namespace ros2
+}  // namespace romea

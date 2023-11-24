@@ -30,6 +30,8 @@
 
 namespace romea
 {
+namespace ros2
+{
 
 template<class CommandType>
 class PathFollowingAlgo
@@ -69,14 +71,14 @@ public:
   };
 
   // clang-format off
-  static constexpr auto OBSERVER_NS_CINEMATIC           = "observers.cinematic_linear_tangent";
-  static constexpr auto OBSERVER_NS_CINEMATIC_LYAPUNOV  = "observers.cinematic_lyapunov";
-  static constexpr auto OBSERVER_NS_DYNAMIC             = "observers.dynamic_back_stepping";
-  static constexpr auto OBSERVER_NS_DYNAMIC_LYAPUNOV    = "observers.dynamic_lyapunov";
-  static constexpr auto COMMAND_NS_CLASSIC              = "commands.classic";
-  static constexpr auto COMMAND_NS_PREDICTIVE           = "commands.predictive";
+  static constexpr auto OBSERVER_NS_CINEMATIC = "observers.cinematic_linear_tangent";
+  static constexpr auto OBSERVER_NS_CINEMATIC_LYAPUNOV = "observers.cinematic_lyapunov";
+  static constexpr auto OBSERVER_NS_DYNAMIC = "observers.dynamic_back_stepping";
+  static constexpr auto OBSERVER_NS_DYNAMIC_LYAPUNOV = "observers.dynamic_lyapunov";
+  static constexpr auto COMMAND_NS_CLASSIC = "commands.classic";
+  static constexpr auto COMMAND_NS_PREDICTIVE = "commands.predictive";
   static constexpr auto COMMAND_NS_CINEMATIC_PREDICTIVE = "commands.cinematic_predictive";
-  static constexpr auto COMMAND_NS_DYNAMIC_PREDICTIVE   = "commands.dynamic_predictive";
+  static constexpr auto COMMAND_NS_DYNAMIC_PREDICTIVE = "commands.dynamic_predictive";
   // clang-format on
 
 public:
@@ -89,7 +91,7 @@ public:
   void setDesiredLinearSpeed(const double & linear_speed);
 
   void setDesiredLateralDeviation(const double & lateral_deviation);
-  double getDesiredLateralDeviation() const { return desired_lateral_deviation_.load(); }
+  double getDesiredLateralDeviation() const {return desired_lateral_deviation_.load();}
 
   void setDesiredCourseDeviation(const double & course_deviation);
 
@@ -97,7 +99,7 @@ public:
 
   void setSteeringAngles(const OdometryMeasureMsg & msg);
 
-  void usePathVelocity(bool enabled) { use_path_velocity_ = enabled; }
+  void usePathVelocity(bool enabled) {use_path_velocity_ = enabled;}
 
   CommandType computeCommand(const romea_path_msgs::msg::PathMatchingInfo2D & msg);
 
@@ -156,7 +158,7 @@ private:
   bool use_path_velocity_ = false;
   bool stop_at_the_end_ = true;
 
-  MobileBaseInertia inertia_parameters_;
+  core::MobileBaseInertia inertia_parameters_;
   double maximal_front_steering_angle_ = 0;
   double maximal_rear_steering_angle_ = 0;
   double wheelbase_ = 0;
@@ -166,30 +168,30 @@ private:
   std::atomic<double> front_steering_angle_ = 0;
   std::atomic<double> rear_steering_angle_ = 0;
 
-  romea::PathFrenetPose2D frenet_pose_;
-  romea::PathPosture2D path_posture_;
+  romea::core::PathFrenetPose2D frenet_pose_;
+  romea::core::PathPosture2D path_posture_;
   double future_curvature_ = 0;
   double path_length_ = 0;
 
   Observer selected_observer_ = Observer::WITHOUT;
   Observer desired_observer_;
-  std::unique_ptr<SlidingObserverCinematicLinearTangent> sliding_observer_cinematic_;
-  std::unique_ptr<SlidingObserverCinematicLyapunov> sliding_observer_cinematic_lyapunov_;
-  FrontRearData sliding_angles_;
+  std::unique_ptr<core::SlidingObserverCinematicLinearTangent> sliding_observer_cinematic_;
+  std::unique_ptr<core::SlidingObserverCinematicLyapunov> sliding_observer_cinematic_lyapunov_;
+  core::FrontRearData sliding_angles_;
 
   Command selected_command_;
   Command desired_command_;
-  std::unique_ptr<FollowTrajectoryClassicSliding> follow_trajectory_classic_sliding_;
-  std::unique_ptr<FollowTrajectoryPredictiveSliding> follow_trajectory_predictive_sliding_;
-  FrontRearData steering_angles_command_;
+  std::unique_ptr<core::FollowTrajectoryClassicSliding> follow_trajectory_classic_sliding_;
+  std::unique_ptr<core::FollowTrajectoryPredictiveSliding> follow_trajectory_predictive_sliding_;
+  core::FrontRearData steering_angles_command_;
 
 #ifdef ROMEA_CONTROL_PRIVATE
-  std::unique_ptr<PrivateSlidingObserverDynamicBackStepping> sliding_observer_dynamic_;
-  std::unique_ptr<PrivateSlidingObserverDynamicLyapunov> sliding_observer_dynamic_lyapunov_;
-  std::unique_ptr<PrivateFollowTrajectoryCinematicPredictiveSliding>
-    follow_trajectory_cinematic_predictive_sliding_;
-  std::unique_ptr<PrivateFollowTrajectoryDynamicPredictiveSliding>
-    follow_trajectory_dynamic_predictive_sliding_;
+  std::unique_ptr<core::PrivateSlidingObserverDynamicBackStepping> sliding_observer_dynamic_;
+  std::unique_ptr<core::PrivateSlidingObserverDynamicLyapunov> sliding_observer_dynamic_lyapunov_;
+  std::unique_ptr<core::PrivateFollowTrajectoryCinematicPredictiveSliding>
+  follow_trajectory_cinematic_predictive_sliding_;
+  std::unique_ptr<core::PrivateFollowTrajectoryDynamicPredictiveSliding>
+  follow_trajectory_dynamic_predictive_sliding_;
 #endif
 
   double linear_speed_command_ = 0;
@@ -202,9 +204,10 @@ private:
 
   FSMStatus fsm_status = FSMStatus::CLASSIC;
   PathFollowingMode path_following_mode_;
-  SimpleFileLogger debug_logger_;
+  core::SimpleFileLogger debug_logger_;
 };
 
+}  // namespace ros2
 }  // namespace romea
 
 #endif

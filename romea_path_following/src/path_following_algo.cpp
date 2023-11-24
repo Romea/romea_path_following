@@ -26,14 +26,17 @@
 
 namespace romea
 {
+namespace ros2
+{
 
 //-----------------------------------------------------------------------------
 template<class CommandType>
-PathFollowingAlgo<CommandType>::PathFollowingAlgo(Node::SharedPtr node) : node_(std::move(node))
+PathFollowingAlgo<CommandType>::PathFollowingAlgo(Node::SharedPtr node)
+: node_(std::move(node))
 {
-  if constexpr (std::is_same_v<CommandType, OneAxleSteeringCommand>) {
+  if constexpr (std::is_same_v<CommandType, core::OneAxleSteeringCommand>) {
     declare_mobile_base_info_2FWS2RWD(node_, "base");
-  } else if constexpr (std::is_same_v<CommandType, TwoAxleSteeringCommand>) {
+  } else if constexpr (std::is_same_v<CommandType, core::TwoAxleSteeringCommand>) {
     declare_mobile_base_info_4WS4WD(node_, "base");
   }
 
@@ -76,7 +79,7 @@ void PathFollowingAlgo<CommandType>::init()
 
 //-----------------------------------------------------------------------------
 template<>
-void PathFollowingAlgo<TwoAxleSteeringCommand>::initKinematicParameters_()
+void PathFollowingAlgo<core::TwoAxleSteeringCommand>::initKinematicParameters_()
 {
   auto base_info = get_mobile_base_info_4WS4WD(node_, "base");
   wheelbase_ = base_info.geometry.axlesDistance;
@@ -92,7 +95,7 @@ void PathFollowingAlgo<TwoAxleSteeringCommand>::initKinematicParameters_()
 
 //-----------------------------------------------------------------------------
 template<>
-void PathFollowingAlgo<OneAxleSteeringCommand>::initKinematicParameters_()
+void PathFollowingAlgo<core::OneAxleSteeringCommand>::initKinematicParameters_()
 {
   auto base_info = get_mobile_base_info_2FWS2RWD(node_, "base");
   wheelbase_ = base_info.geometry.axlesDistance;
@@ -167,24 +170,24 @@ CommandType PathFollowingAlgo<CommandType>::computeCommand(
 
   switch (fsm_status) {
     case FSMStatus::CLASSIC: {
-      extractMatchedPointInfo(matched_point);
-      computeLinearSpeedCommand_();
-    } break;
+        extractMatchedPointInfo(matched_point);
+        computeLinearSpeedCommand_();
+      } break;
     case FSMStatus::BIRD_DECELERATE: {
-      extractMatchedPointInfo(msg.matched_points[0]);
-      linear_speed_command_ = 0;
-    } break;
+        extractMatchedPointInfo(msg.matched_points[0]);
+        linear_speed_command_ = 0;
+      } break;
     case FSMStatus::BIRD_WHEEL_ROTATION: {
-      extractMatchedPointInfo(msg.matched_points[0]);
-      linear_speed_command_ = 0;
-    } break;
+        extractMatchedPointInfo(msg.matched_points[0]);
+        linear_speed_command_ = 0;
+      } break;
     case FSMStatus::BIRD_ACCELERATE: {
-      extractMatchedPointInfo(msg.matched_points[0]);
-      computeLinearSpeedCommand_();
-    } break;
+        extractMatchedPointInfo(msg.matched_points[0]);
+        computeLinearSpeedCommand_();
+      } break;
     default:
       break;
-  };
+  }
 
   debug_logger_.addEntry("stamp", rclcpp::Time{msg.header.stamp}.seconds());
   debug_logger_.addEntry("fsm_status", static_cast<int>(fsm_status));
@@ -253,7 +256,7 @@ void PathFollowingAlgo<CommandType>::initObservers_()
 template<class CommandType>
 void PathFollowingAlgo<CommandType>::makeSlidingObserverCinematic_()
 {
-  sliding_observer_cinematic_ = make_observer<SlidingObserverCinematicLinearTangent>(
+  sliding_observer_cinematic_ = make_observer<core::SlidingObserverCinematicLinearTangent>(
     node_, OBSERVER_NS_CINEMATIC, 0.1, wheelbase_);
 }
 
@@ -261,7 +264,7 @@ void PathFollowingAlgo<CommandType>::makeSlidingObserverCinematic_()
 template<class CommandType>
 void PathFollowingAlgo<CommandType>::makeSlidingObserverCinematicLyapunov_()
 {
-  sliding_observer_cinematic_lyapunov_ = make_observer<SlidingObserverCinematicLyapunov>(
+  sliding_observer_cinematic_lyapunov_ = make_observer<core::SlidingObserverCinematicLyapunov>(
     node_, OBSERVER_NS_CINEMATIC_LYAPUNOV, 0.1, wheelbase_);
 }
 
@@ -300,7 +303,7 @@ template<class CommandType>
 void PathFollowingAlgo<CommandType>::makeFollowTrajectoryClassicSliding_()
 {
   follow_trajectory_classic_sliding_ =
-    make_command<FollowTrajectoryClassicSliding>(node_, COMMAND_NS_CLASSIC, wheelbase_);
+    make_command<core::FollowTrajectoryClassicSliding>(node_, COMMAND_NS_CLASSIC, wheelbase_);
 }
 
 //-----------------------------------------------------------------------------
@@ -308,7 +311,7 @@ template<class CommandType>
 void PathFollowingAlgo<CommandType>::makeFollowTrajectoryPredictiveSliding_()
 {
   follow_trajectory_predictive_sliding_ =
-    make_command<FollowTrajectoryPredictiveSliding>(node_, COMMAND_NS_PREDICTIVE, wheelbase_);
+    make_command<core::FollowTrajectoryPredictiveSliding>(node_, COMMAND_NS_PREDICTIVE, wheelbase_);
 }
 
 #ifdef ROMEA_CONTROL_PRIVATE
@@ -319,7 +322,7 @@ void PathFollowingAlgo<CommandType>::makeFollowTrajectoryCinematicPredictiveSlid
 {
   if (!is_rear_steering_command_enabled_) {
     throw std::runtime_error(
-      "Rear steering command must be enabled when using cinematic predictive command");
+            "Rear steering command must be enabled when using cinematic predictive command");
   }
 
   using Command = PrivateFollowTrajectoryCinematicPredictiveSliding;
@@ -334,7 +337,7 @@ void PathFollowingAlgo<CommandType>::makeFollowTrajectoryDynamicPredictiveSlidin
 {
   if (is_rear_steering_command_enabled_) {
     throw std::runtime_error(
-      "Rear steering command must be disabled when using dynamic predictive command");
+            "Rear steering command must be disabled when using dynamic predictive command");
   }
 
   using Command = PrivateFollowTrajectoryDynamicPredictiveSliding;
@@ -360,8 +363,8 @@ void PathFollowingAlgo<CommandType>::selectCommand_()
   } else if (command_name.find("dynamic_predictive") != std::string::npos) {
     if (desired_observer_ != Observer::DYNAMIC_LYAPUNOV) {
       throw std::runtime_error(
-        "Dynamic Lyapunov sliding observer must be selected when using dynamic predictive "
-        "command");
+              "Dynamic Lyapunov sliding observer must be selected when using dynamic predictive "
+              "command");
     }
 
     if (command_name.find("one_steering") != std::string::npos) {
@@ -417,14 +420,15 @@ void PathFollowingAlgo<CommandType>::computeSlidingAnglesCinematic_()
 {
   sliding_observer_cinematic_->update(
     frenet_pose_.lateralDeviation,
-    sign(linear_speed_) * frenet_pose_.courseDeviation,
+    core::sign(linear_speed_) * frenet_pose_.courseDeviation,
     path_posture_.curvature,
     linear_speed_,
     front_steering_angle_,
     rear_steering_angle_);
-  if (frenet_pose_.curvilinearAbscissa < 5)
+  if (frenet_pose_.curvilinearAbscissa < 5) {
     sliding_observer_cinematic_->initObserver_(
       frenet_pose_.lateralDeviation, frenet_pose_.courseDeviation);
+  }
 
   //  if (frenet_pose_.curvilinearAbscissa<5)
   //      sliding_observer_cinematic_->initObserver_(frenet_pose_.lateralDeviation,frenet_pose_.courseDeviation);
@@ -443,7 +447,7 @@ void PathFollowingAlgo<CommandType>::computeSlidingAnglesCinematicLyapunov_()
     path_posture_.position.x() - std::sin(path_posture_.course) * frenet_pose_.lateralDeviation;
   double y =
     path_posture_.position.y() + std::cos(path_posture_.course) * frenet_pose_.lateralDeviation;
-  double course = path_posture_.course + sign(linear_speed_) * frenet_pose_.courseDeviation;
+  double course = path_posture_.course + core::sign(linear_speed_) * frenet_pose_.courseDeviation;
 
   debug_logger_.addEntry("x", x);
   debug_logger_.addEntry("y", y);
@@ -451,8 +455,9 @@ void PathFollowingAlgo<CommandType>::computeSlidingAnglesCinematicLyapunov_()
 
   sliding_observer_cinematic_lyapunov_->update(
     x, y, course, linear_speed_, front_steering_angle_, rear_steering_angle_);
-  if (frenet_pose_.curvilinearAbscissa < 5)
+  if (frenet_pose_.curvilinearAbscissa < 5) {
     sliding_observer_cinematic_lyapunov_->initObserverHandbooks_(x, y, course);
+  }
 
   //  if (frenet_pose_.curvilinearAbscissa<5)
   //      sliding_observer_cinematic_lyapunov_->initObserverHandbooks_(x,y,course);
@@ -623,20 +628,20 @@ void PathFollowingAlgo<CommandType>::computeSteeringAnglesDynamicPredictiveSlidi
 {
   steering_angles_command_.front =
     follow_trajectory_dynamic_predictive_sliding_->computeFrontSteeringAngle(
-      frenet_pose_.lateralDeviation,
-      frenet_pose_.courseDeviation,
-      path_posture_.curvature,
-      future_curvature_,
-      linear_speed_,
-      angular_speed_,
-      front_steering_angle_,
-      rear_steering_angle_,
-      sliding_angles_.front,
-      sliding_angles_.rear,
-      sliding_observer_dynamic_lyapunov_->getFrontCorneredStiffness(),
-      sliding_observer_dynamic_lyapunov_->getRearCorneredStiffness(),
-      maximal_steeering_angle_,
-      desired_lateral_deviation_);
+    frenet_pose_.lateralDeviation,
+    frenet_pose_.courseDeviation,
+    path_posture_.curvature,
+    future_curvature_,
+    linear_speed_,
+    angular_speed_,
+    front_steering_angle_,
+    rear_steering_angle_,
+    sliding_angles_.front,
+    sliding_angles_.rear,
+    sliding_observer_dynamic_lyapunov_->getFrontCorneredStiffness(),
+    sliding_observer_dynamic_lyapunov_->getRearCorneredStiffness(),
+    maximal_steeering_angle_,
+    desired_lateral_deviation_);
 }
 #endif
 
@@ -671,7 +676,8 @@ void PathFollowingAlgo<CommandType>::computeSteeringAngles_()
 
 //-----------------------------------------------------------------------------
 template<>
-void PathFollowingAlgo<OneAxleSteeringCommand>::setSteeringAngles(const OdometryMeasureMsg & msg)
+void PathFollowingAlgo<core::OneAxleSteeringCommand>::setSteeringAngles(
+  const OdometryMeasureMsg & msg)
 {
   front_steering_angle_ = msg.measure.steering_angle;
   rear_steering_angle_ = 0;
@@ -679,7 +685,8 @@ void PathFollowingAlgo<OneAxleSteeringCommand>::setSteeringAngles(const Odometry
 
 //-----------------------------------------------------------------------------
 template<>
-void PathFollowingAlgo<TwoAxleSteeringCommand>::setSteeringAngles(const OdometryMeasureMsg & msg)
+void PathFollowingAlgo<core::TwoAxleSteeringCommand>::setSteeringAngles(
+  const OdometryMeasureMsg & msg)
 {
   front_steering_angle_ = msg.measure.front_steering_angle;
   rear_steering_angle_ = msg.measure.rear_steering_angle;
@@ -687,9 +694,9 @@ void PathFollowingAlgo<TwoAxleSteeringCommand>::setSteeringAngles(const Odometry
 
 //-----------------------------------------------------------------------------
 template<>
-OneAxleSteeringCommand PathFollowingAlgo<OneAxleSteeringCommand>::makeCommand_()
+core::OneAxleSteeringCommand PathFollowingAlgo<core::OneAxleSteeringCommand>::makeCommand_()
 {
-  OneAxleSteeringCommand command;
+  core::OneAxleSteeringCommand command;
   command.longitudinalSpeed = linear_speed_command_;
   command.steeringAngle = steering_angles_command_.front;
   static std::default_random_engine generator;
@@ -706,9 +713,9 @@ OneAxleSteeringCommand PathFollowingAlgo<OneAxleSteeringCommand>::makeCommand_()
 
 //-----------------------------------------------------------------------------
 template<>
-TwoAxleSteeringCommand PathFollowingAlgo<TwoAxleSteeringCommand>::makeCommand_()
+core::TwoAxleSteeringCommand PathFollowingAlgo<core::TwoAxleSteeringCommand>::makeCommand_()
 {
-  TwoAxleSteeringCommand command;
+  core::TwoAxleSteeringCommand command;
   command.longitudinalSpeed = linear_speed_command_;
   command.frontSteeringAngle = steering_angles_command_.front;
   command.rearSteeringAngle = steering_angles_command_.rear * is_rear_steering_command_enabled_;
@@ -745,7 +752,7 @@ void PathFollowingAlgo<CommandType>::limitLinearSpeedCommand_()
   const double & steering = front_steering_angle_;
 
   double flag = 1;
-  if (fabs(steering) < 10 / 180. * M_PI) flag = 0;
+  if (fabs(steering) < 10 / 180. * M_PI) {flag = 0;}
 
   linear_speed_command_ =
     fabs(desired_linear_speed_) -
@@ -789,8 +796,8 @@ void PathFollowingAlgo<CommandType>::computeKP_()
   double RapportVitRot = 8;
   double T_omega = 1.5;
   kp = 8 / (RapportVitRot * T_omega * speed);
-  if (kp < kp_min) kp = kp_min;
-  if (kp > kp_max) kp = kp_max;
+  if (kp < kp_min) {kp = kp_min;}
+  if (kp > kp_max) {kp = kp_max;}
   // *******
 
   debug_logger_.addEntry("kpcomputed", kp);
@@ -859,7 +866,9 @@ void PathFollowingAlgo<CommandType>::updateFSM_(
   switch (fsm_status) {
     case FSMStatus::CLASSIC:
       // if it's the last point
-      if (section_index_last_ != msg.matched_points[msg.tracked_matched_point_index].section_index) {
+      if (section_index_last_ !=
+        msg.matched_points[msg.tracked_matched_point_index].section_index)
+      {
         fsm_status = FSMStatus::BIRD_DECELERATE;
         RCLCPP_INFO(rclcpp::get_logger("FSM"), "transit to BIRD_DECELERATE");
       }
@@ -874,8 +883,9 @@ void PathFollowingAlgo<CommandType>::updateFSM_(
       if (
         std::abs(front_steering_angle_ - steering_angles_command_.front) < 0.05 &&
         (is_rear_steering_command_enabled_ *
-           std::abs(rear_steering_angle_ - steering_angles_command_.rear) <
-         0.05)) {
+        std::abs(rear_steering_angle_ - steering_angles_command_.rear) <
+        0.05))
+      {
         fsm_status = FSMStatus::BIRD_ACCELERATE;
         RCLCPP_INFO(rclcpp::get_logger("FSM"), "transit to BIRD_ACCELERATE");
       }
@@ -893,7 +903,8 @@ void PathFollowingAlgo<CommandType>::updateFSM_(
   // std::cout << " end fsm update " << int(fsm_status)<< std::endl;
 }
 
-template class PathFollowingAlgo<TwoAxleSteeringCommand>;
-template class PathFollowingAlgo<OneAxleSteeringCommand>;
+template class PathFollowingAlgo<core::TwoAxleSteeringCommand>;
+template class PathFollowingAlgo<core::OneAxleSteeringCommand>;
 
+}  // namespace ros2
 }  // namespace romea

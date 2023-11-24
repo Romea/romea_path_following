@@ -4,6 +4,8 @@
 
 namespace romea
 {
+namespace ros2
+{
 
 PathFollowingComponent::PathFollowingComponent(const rclcpp::NodeOptions & options)
 : node_(std::make_shared<rclcpp_lifecycle::LifecycleNode>("path_following", options))
@@ -25,13 +27,13 @@ PathFollowingComponent::PathFollowingComponent(const rclcpp::NodeOptions & optio
   autostart_descr.description = "Automatically start the robot when the node is configured";
   node_->declare_parameter("autostart", false, std::move(autostart_descr));
 
-  auto frame = romea::get_parameter<std::string>(node_, "base.type");
+  auto frame = get_parameter<std::string>(node_, "base.type");
   if (frame == "4WS4WD") {
-    control_ = std::make_unique<PathFollowing<TwoAxleSteeringCommand>>(node_);
+    control_ = std::make_unique<PathFollowing<core::TwoAxleSteeringCommand>>(node_);
   } else if (frame == "2FWS2RWD") {
-    control_ = std::make_unique<PathFollowing<OneAxleSteeringCommand>>(node_);
+    control_ = std::make_unique<PathFollowing<core::OneAxleSteeringCommand>>(node_);
   } else if (frame == "2FWS4WD") {
-    control_ = std::make_unique<PathFollowing<OneAxleSteeringCommand>>(node_);
+    control_ = std::make_unique<PathFollowing<core::OneAxleSteeringCommand>>(node_);
   } else {
     throw std::runtime_error(frame + " frame type  is not supported");
   }
@@ -47,7 +49,8 @@ PathFollowingComponent::PathFollowingComponent(const rclcpp::NodeOptions & optio
 //-----------------------------------------------------------------------------
 PathFollowingComponent::CallbackReturn PathFollowingComponent::on_configure(
   const rclcpp_lifecycle::State &)
-try {
+try
+{
   control_->init();
   RCLCPP_INFO(node_->get_logger(), "configured");
   return CallbackReturn::SUCCESS;
@@ -73,7 +76,8 @@ PathFollowingComponent::CallbackReturn PathFollowingComponent::on_deactivate(
   return CallbackReturn::SUCCESS;
 }
 
+}  // namespace ros2
 }  // namespace romea
 
 #include "rclcpp_components/register_node_macro.hpp"
-RCLCPP_COMPONENTS_REGISTER_NODE(romea::PathFollowingComponent)
+RCLCPP_COMPONENTS_REGISTER_NODE(romea::ros2::PathFollowingComponent)
